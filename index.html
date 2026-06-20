@@ -362,6 +362,17 @@
             text-decoration: wavy underline;
         }
 
+        .error-msg {
+            color: #ff4444;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: none;
+            background: #1a0000;
+            padding: 8px;
+            border-radius: 20px;
+            border: 1px solid #ff4444;
+        }
+
         @media (max-width: 780px) {
             .container { padding: 1rem; }
             h1 { font-size: 2rem; }
@@ -398,6 +409,8 @@
         <div class="tg-auth-wrapper">
             <button class="tg-auth-button" data-style="outlined" id="tgLoginBtn">🔵 Войти через Telegram</button>
         </div>
+
+        <div id="errorMsg" class="error-msg"></div>
 
         <div class="code-required" id="codeRequired">
             <div class="input-group">
@@ -458,6 +471,9 @@
 </div>
 
 <script>
+    // === НАСТРОЙКИ ===
+    const BOT_ID = '8676605890';  // ← ВАШ ID БОТА
+    
     // === СПИСОК АДМИНОВ ===
     const ADMIN_USERS = ['Am_Yuma', 'PolinkaFix', 'FIXFers', 'Capri_Is_Here'];
 
@@ -478,6 +494,7 @@
     const codeConfirmBtn = document.getElementById('codeConfirmBtn');
     const tgLoginBtn = document.getElementById('tgLoginBtn');
     const userAvatar = document.getElementById('userAvatar');
+    const errorMsg = document.getElementById('errorMsg');
 
     let pendingAuthData = null;
 
@@ -485,7 +502,12 @@
     function handleTelegramAuth(data) {
         console.log('Telegram OAuth data:', data);
 
-        const username = data.username || data.first_name || 'unknown';
+        if (!data || !data.id) {
+            showError('Ошибка авторизации. Попробуйте ещё раз.');
+            return;
+        }
+
+        const username = data.username || data.first_name || 'user' + data.id;
 
         if (username === 'Am_Yuma') {
             pendingAuthData = data;
@@ -496,12 +518,20 @@
         completeAuth(data, username);
     }
 
+    function showError(text) {
+        errorMsg.textContent = '❌ ' + text;
+        errorMsg.style.display = 'block';
+        setTimeout(() => {
+            errorMsg.style.display = 'none';
+        }, 5000);
+    }
+
     // === ПОДТВЕРЖДЕНИЕ КОДА ДЛЯ AMNYAM ===
     codeConfirmBtn.addEventListener('click', function() {
         const code = amnyamCode.value.trim();
 
         if (!code || code !== AMNYAM_CODE) {
-            alert('Неверный код доступа Амням-Алега номер 9921. Доступ запрещён.');
+            showError('Неверный код доступа Амням-Алега номер 9921. Доступ запрещён.');
             return;
         }
 
@@ -586,8 +616,7 @@
 
     // === КНОПКА ВХОДА ===
     tgLoginBtn.addEventListener('click', function() {
-        const clientId = '@FersKOMnaszor_bot';
-        const authUrl = `https://oauth.telegram.org/auth?bot_id=${clientId.replace('@', '')}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write`;
+        const authUrl = `https://oauth.telegram.org/auth?bot_id=${BOT_ID}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write`;
         
         const width = 600;
         const height = 600;
@@ -601,7 +630,7 @@
         );
         
         if (!popup) {
-            alert('Пожалуйста, разрешите всплывающие окна для этого сайта');
+            showError('⚠️ Разрешите всплывающие окна для этого сайта');
         }
     });
 
@@ -610,12 +639,12 @@
 
     console.log('%cФКН ПАСПОРТА · Бета-версия', 'color: #ff4444; font-size: 16px; font-weight: bold;');
     console.log('%c🛡️ ВХОД ТОЛЬКО С ВПН ДЛЯ БЕЗОПАСНОСТИ', 'color: #ff4444; font-size: 14px; font-weight: bold;');
+    console.log(`%c🤖 BOT_ID: ${BOT_ID}`, 'color: #66ff66;');
     console.log('%cАдминистраторы ФКН:', 'color: #ffaa66;');
     ADMIN_USERS.forEach(u => console.log(`  👑 @${u}`));
     console.log('%c🍬 @Am_Yuma (Амням-Алег №9921) позывной "ам-ном"', 'color: #88ff88;');
     console.log('%c🔑 Код доступа: 6614398asnud!199', 'color: #ffaa44;');
     console.log('%c🧪 бета-тест благодаря ДД-дэвэлопер-сапорт', 'color: #66cc66;');
-    console.log('%c🤖 Бот: @FersKOMnaszor_bot', 'color: #66aaff;');
 </script>
 </body>
 </html>
