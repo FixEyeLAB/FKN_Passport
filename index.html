@@ -77,26 +77,6 @@
             border: 1px solid #c44;
         }
 
-        .beta-badge {
-            background: #1a0000;
-            border: 2px solid #ff8800;
-            border-radius: 60px;
-            padding: 4px 20px;
-            display: inline-block;
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #ff8800;
-            letter-spacing: 3px;
-            margin-top: 8px;
-            animation: betaPulse 2s infinite;
-        }
-
-        @keyframes betaPulse {
-            0% { border-color: #ff8800; box-shadow: 0 0 10px #ff880033; }
-            50% { border-color: #ffaa44; box-shadow: 0 0 25px #ff880066; }
-            100% { border-color: #ff8800; box-shadow: 0 0 10px #ff880033; }
-        }
-
         .vpn-warning {
             background: #1a0000;
             border: 2px solid #ff2222;
@@ -148,6 +128,41 @@
             margin-bottom: 1rem;
             font-weight: normal;
             letter-spacing: 2px;
+        }
+
+        .telegram-login-container {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .tg-auth-button {
+            background: #0088cc;
+            border: none;
+            padding: 18px 50px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: white;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.3rem;
+            box-shadow: 0 3px 0 #005577;
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .tg-auth-button:hover {
+            background: #00aaff;
+            transform: scale(1.02);
+        }
+
+        .tg-auth-button .tg-icon {
+            font-size: 1.8rem;
         }
 
         .code-required {
@@ -387,17 +402,12 @@
             border-color: #ff4444;
         }
 
-        .telegram-login-container {
-            display: flex;
-            justify-content: center;
-            margin: 1rem 0;
-        }
-
         @media (max-width: 780px) {
             .container { padding: 1rem; }
             h1 { font-size: 2rem; }
             .login-section { padding: 1.2rem; }
             .vpn-warning { font-size: 0.8rem; padding: 8px 16px; }
+            .tg-auth-button { font-size: 1rem; padding: 14px 30px; max-width: 300px; }
         }
     </style>
 </head>
@@ -411,8 +421,6 @@
             <span class="cyber-emblem">⚡🔒📡</span>
         </div>
         <div class="sub">Федеральная служба ФерсКомНадзора · Цифровая идентификация ФЧ</div>
-        
-        <div class="beta-badge">⚡ БЕТА ⚡</div>
         
         <div class="vpn-warning">
             <span class="vpn-icon">🛡️</span> ВХОД ТОЛЬКО С ВПН ДЛЯ БЕЗОПАСНОСТИ <span class="vpn-icon">🛡️</span>
@@ -430,11 +438,18 @@
             Авторизуйтесь через бота <strong style="color:#aa8888;">@FersKOMnaszor_bot</strong>
         </div>
 
-        <!-- ТУТ ВАШ ВИДЖЕТ - НЕ ТРОГАЮ! -->
+        <!-- ========================================= -->
+        <!-- === ВАШ КОД - НЕ ТРОГАЮ! === -->
+        <!-- ========================================= -->
         <div class="telegram-login-container">
             <script async src="https://oauth.telegram.org/js/telegram-login.js?5" data-client-id="@FersKOMnaszor_bot" data-onauth="handleTelegramAuth(data)" data-request-access="write phone"></script>
-            <button class="tg-auth-button" data-style="outlined" id="tgLoginBtn">🔵 Войти через Telegram</button>
+            <button class="tg-auth-button" data-style="outlined">
+                <span class="tg-icon">✈️</span> Sign In with Telegram
+            </button>
         </div>
+        <!-- ========================================= -->
+        <!-- === КОНЕЦ ВАШЕГО КОДА === -->
+        <!-- ========================================= -->
 
         <div id="errorMsg" class="error-msg"></div>
 
@@ -524,15 +539,14 @@
     const codeRequired = document.getElementById('codeRequired');
     const amnyamCode = document.getElementById('amnyamCode');
     const codeConfirmBtn = document.getElementById('codeConfirmBtn');
-    const tgLoginBtn = document.getElementById('tgLoginBtn');
     const userAvatar = document.getElementById('userAvatar');
     const errorMsg = document.getElementById('errorMsg');
     const logoutBtn = document.getElementById('logoutBtn');
 
     let pendingAuthData = null;
 
-    // === ФУНКЦИЯ ОБРАБОТКИ АВТОРИЗАЦИИ ===
-    function handleTelegramAuth(data) {
+    // === ГЛАВНАЯ ФУНКЦИЯ ОБРАБОТКИ АВТОРИЗАЦИИ ===
+    window.handleTelegramAuth = function(data) {
         console.log('Telegram OAuth data:', data);
 
         if (!data || !data.id) {
@@ -549,7 +563,7 @@
         }
 
         completeAuth(data, username);
-    }
+    };
 
     function showError(text) {
         errorMsg.textContent = '❌ ' + text;
@@ -647,17 +661,6 @@
         }
     });
 
-    // === КНОПКА ВХОДА ===
-    tgLoginBtn.addEventListener('click', function() {
-        // Используем ваш виджет - он сам откроет окно авторизации
-        // Просто вызываем клик по виджету
-        const widgetButton = document.querySelector('.tg-auth-button[data-style="outlined"]');
-        if (widgetButton) {
-            // Виджет сам обработает авторизацию через data-onauth
-            console.log('Кнопка входа нажата');
-        }
-    });
-
     // === ВЫХОД ===
     logoutBtn.addEventListener('click', function() {
         loginSection.style.display = 'block';
@@ -671,9 +674,6 @@
         
         console.log('🚪 Выход из системы');
     });
-
-    // === ГЛОБАЛЬНАЯ ФУНКЦИЯ ДЛЯ TELEGRAM WIDGET ===
-    window.handleTelegramAuth = handleTelegramAuth;
 
     console.log('%cФКН ПАСПОРТА · Бета-версия', 'color: #ff4444; font-size: 16px; font-weight: bold;');
     console.log('%c🛡️ ВХОД ТОЛЬКО С ВПН ДЛЯ БЕЗОПАСНОСТИ', 'color: #ff4444; font-size: 14px; font-weight: bold;');
