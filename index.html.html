@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ФКН ПАСПОРТА · Вход через Telegram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 30%, #1a0101, #000000);
+            font-family: 'Courier New', 'Fira Code', 'VT323', monospace;
+            color: #e0dcdc;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            background: #0a0101ee;
+            border: 4px solid #b00020;
+            border-radius: 32px;
+            box-shadow: 0 0 45px #ff000066, inset 0 0 20px #ff000033;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #a22;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .badge {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .cyber-emblem {
+            font-size: 3rem;
+            filter: drop-shadow(0 0 5px #ff4444);
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            letter-spacing: 6px;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #ff5e5e, #8b0000);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 8px #990000;
+        }
+
+        .sub {
+            font-size: 0.95rem;
+            color: #ffaaaa;
+            background: #2a0101;
+            display: inline-block;
+            padding: 6px 24px;
+            border-radius: 60px;
+            margin-top: 10px;
+            border: 1px solid #c44;
+        }
+
+        .login-section {
+            background: #0d0000;
+            border: 2px solid #a33;
+            border-radius: 28px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .login-section h2 {
+            color: #ff8888;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: normal;
+            letter-spacing: 2px;
+        }
+
+        .tg-auth-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .tg-auth-button {
+            background: #0088cc;
+            border: none;
+            padding: 14px 40px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: white;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 0 #005577;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .tg-auth-button:hover {
+            background: #00aaff;
+            transform: scale(1.02);
+        }
+
+        .code-required {
+            display: none;
+            background: #2a0101;
+            border: 1px solid #ff6644;
+            border-radius: 20px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .code-required.visible {
+            display: block;
+        }
+
+        .code-required .input-group {
+            margin: 0.5rem 0;
+        }
+
+        .code-required .input-group input {
+            width: 100%;
+            background: #240101;
+            border: 1px solid #d55;
+            padding: 12px 16px;
+            color: #ffd0d0;
+            font-family: monospace;
+            border-radius: 40px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .code-required .input-group input:focus {
+            outline: 2px solid #ff4444;
+            border-color: #ff4444;
+        }
+
+        .code-required .input-group label {
+            display: block;
+            color: #cc8888;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .code-required .code-hint {
+            font-size: 0.7rem;
+            color: #aa6655;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #9e0000;
+            border: none;
+            padding: 12px 32px;
+            font-family: monospace;
+            font-weight: bold;
+            color: white;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 2px 0 #4f0000;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: #cc2222;
+        }
+
+        .btn-primary:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-box {
+            background: #1a0101;
+            border: 1px solid #a33;
+            border-radius: 20px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .status-box .status-icon {
+            font-size: 2rem;
+        }
+
+        .status-box .status-text {
+            font-size: 0.9rem;
+            color: #ddbbbb;
+            margin-top: 4px;
+        }
+
+        .passport-preview {
+            background: #1a0101;
+            border: 2px solid #a33;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            display: none;
+        }
+
+        .passport-preview.visible {
+            display: block;
+        }
+
+        .passport-preview .id-number {
+            font-size: 1.8rem;
+            color: #ff6666;
+            letter-spacing: 4px;
+            background: #00000055;
+            padding: 10px;
+            border-radius: 16px;
+            font-family: monospace;
+        }
+
+        .passport-preview .admin-badge {
+            display: inline-block;
+            background: #8b0000;
+            color: #ffdd44;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 1px solid #ffdd44;
+            margin-top: 8px;
+        }
+
+        .passport-preview .callsign {
+            font-size: 0.8rem;
+            color: #ccaa88;
+            margin-top: 4px;
+            background: #1a0101;
+            padding: 2px 12px;
+            border-radius: 40px;
+            display: inline-block;
+            border: 1px dashed #886644;
+        }
+
+        .admin-only {
+            display: none;
+            background: #1a0101;
+            border: 1px solid #ffdd44;
+            border-radius: 20px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #ffdd88;
+        }
+
+        .admin-only.visible {
+            display: block;
+        }
+
+        .user-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            font-size: 0.8rem;
+        }
+
+        .user-list .user-item {
+            background: #0d0000;
+            padding: 6px 12px;
+            border-radius: 40px;
+            border: 1px solid #a33;
+            text-align: center;
+        }
+
+        .user-list .user-item.admin {
+            border-color: #ffdd44;
+            color: #ffdd88;
+        }
+
+        .beta-footer {
+            display: none;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #88aa88;
+            margin-top: 1rem;
+            padding: 8px;
+            border-top: 1px solid #446644;
+            border-bottom: 1px solid #446644;
+            background: #0a1a0a33;
+        }
+
+        .beta-footer.visible {
+            display: block;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.65rem;
+            border-top: 1px solid #a33;
+            padding-top: 1rem;
+            color: #b77;
+        }
+
+        a {
+            color: #ff8a8a;
+            text-decoration: wavy underline;
+        }
+
+        @media (max-width: 780px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            .login-section { padding: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="badge">
+            <span class="cyber-emblem">🛂🆔🔴</span>
+            <h1>ФКН ПАСПОРТА</h1>
+            <span class="cyber-emblem">⚡🔒📡</span>
+        </div>
+        <div class="sub">Федеральная служба ФерсКомНадзора · Цифровая идентификация ФЧ</div>
+        <div style="font-size: 0.65rem; margin-top: 8px; color: #996666;">
+            Бета-версия · Вход через Telegram
+        </div>
+    </div>
+
+    <div class="login-section" id="loginSection">
+        <h2>🔐 ВХОД ЧЕРЕЗ TELEGRAM</h2>
+
+        <div style="font-size: 0.75rem; color: #886666; margin-bottom: 1rem;">
+            Авторизуйтесь через бота <strong style="color:#aa8888;">@FersKOMnaszor_bot</strong>
+        </div>
+
+        <div class="tg-auth-wrapper">
+            <button class="tg-auth-button" data-style="outlined">🔵 Войти через Telegram</button>
+        </div>
+
+        <div class="code-required" id="codeRequired">
+            <div class="input-group">
+                <label>🔐 КОД ДОСТУПА АМНЯМ-АЛЕГА</label>
+                <input type="password" id="amnyamCode" placeholder="Введите специальный код доступа">
+            </div>
+            <div class="code-hint">
+                ⚠️ Для @Am_Yuma (Амням-Алег №9921) требуется специальный код
+            </div>
+            <button class="btn-primary" id="codeConfirmBtn">✅ ПОДТВЕРДИТЬ КОД</button>
+        </div>
+
+        <div class="status-box" id="statusBox">
+            <span class="status-icon">⏳</span>
+            <span class="status-text">Ожидание авторизации...</span>
+        </div>
+    </div>
+
+    <div class="passport-preview" id="passportPreview">
+        <div style="font-size: 1.2rem; color: #ffaaaa;">🆔 ФКН-ПАСПОРТ</div>
+        <div style="display: flex; justify-content: center; gap: 1.5rem; margin: 0.8rem 0; flex-wrap: wrap;">
+            <span>ФЧ-2026-<span id="passportNumber">XXXX</span></span>
+            <span>Статус: <span id="passportStatus" style="color:#ff7777;">ВЕРИФИЦИРОВАН</span></span>
+        </div>
+        <div id="callsignContainer" style="display: none;">
+            <div class="callsign">📡 Позывной: <span id="callsignText">ам-ном</span></div>
+        </div>
+        <div id="adminBadgeContainer" style="display: none;">
+            <div class="admin-badge">👑 ПРАВА АДМИНИСТРАТОРА ФКН</div>
+        </div>
+        <div style="font-size: 0.7rem; color: #aa8888; margin-top: 4px;">
+            Владелец: <span id="passportOwner">—</span>
+        </div>
+    </div>
+
+    <div class="admin-only" id="adminPanel">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <span style="font-weight: bold;">⚙️ ПАНЕЛЬ АДМИНИСТРАТОРА ФКН</span>
+            <span style="font-size: 0.7rem; color: #cc8866;">Доступно только для уполномоченных лиц</span>
+        </div>
+        <div style="margin-top: 1rem;">
+            <div style="font-size: 0.8rem; color: #bb9999;">Привилегированные пользователи ФЧ:</div>
+            <div class="user-list">
+                <div class="user-item admin">@Am_Yuma (Амням-Алег №9921)</div>
+                <div class="user-item admin">@PolinkaFix</div>
+                <div class="user-item admin">@FIXFers</div>
+                <div class="user-item admin">@Capri_Is_Here</div>
+            </div>
+            <div style="font-size: 0.7rem; color: #888866; margin-top: 0.5rem;">
+                🔒 Система паспортов ФКН · Все права защищены
+            </div>
+        </div>
+    </div>
+
+    <div class="beta-footer" id="betaFooter">
+        🧪 бета-тест благодаря ДД-дэвэлопер-сапорт
+    </div>
+
+    <footer>
+        © ФКН ПАСПОРТА — Бета-версия. Вход через Telegram.<br>
+        Фиксай, Фиксая, Фиксаю, Фиксаем, о Фиксае — все паспорта действительны.
+    </footer>
+</div>
+
+<!-- Telegram OAuth скрипт -->
+<script async src="https://oauth.telegram.org/js/telegram-login.js?5" data-client-id="@FersKOMnaszor_bot" data-onauth="handleTelegramAuth(data)" data-request-access="write phone"></script>
+
+<script>
+    // === СПИСОК АДМИНОВ ===
+    const ADMIN_USERS = ['Am_Yuma', 'PolinkaFix', 'FIXFers', 'Capri_Is_Here'];
+
+    // === СПЕЦИАЛЬНЫЙ КОД ДЛЯ АМНЯМ-АЛЕГА ===
+    const AMNYAM_CODE = '6614398asnud!199';
+
+    // === ЭЛЕМЕНТЫ ===
+    const statusBox = document.getElementById('statusBox');
+    const statusIcon = statusBox.querySelector('.status-icon');
+    const statusText = statusBox.querySelector('.status-text');
+    const passportPreview = document.getElementById('passportPreview');
+    const passportNumber = document.getElementById('passportNumber');
+    const passportStatus = document.getElementById('passportStatus');
+    const passportOwner = document.getElementById('passportOwner');
+    const adminBadgeContainer = document.getElementById('adminBadgeContainer');
+    const adminPanel = document.getElementById('adminPanel');
+    const callsignContainer = document.getElementById('callsignContainer');
+    const betaFooter = document.getElementById('betaFooter');
+    const codeRequired = document.getElementById('codeRequired');
+    const amnyamCode = document.getElementById('amnyamCode');
+    const codeConfirmBtn = document.getElementById('codeConfirmBtn');
+
+    let pendingAuthData = null;
+    let isLoggedIn = false;
+    let currentUser = '';
+    let isAdmin = false;
+
+    // === ОБРАБОТЧИК TELEGRAM OAUTH ===
+    window.handleTelegramAuth = function(data) {
+        console.log('Telegram OAuth data:', data);
+
+        const username = data.username || data.first_name || 'unknown';
+
+        // Если это Am_Yuma, запрашиваем код
+        if (username === 'Am_Yuma') {
+            pendingAuthData = data;
+            codeRequired.classList.add('visible');
+            statusIcon.textContent = '🔐';
+            statusText.textContent = 'Для @Am_Yuma требуется специальный код доступа';
+            statusText.style.color = '#ffaa44';
+            return;
+        }
+
+        // Для остальных пользователей — сразу пропускаем
+        completeAuth(data, username);
+    };
+
+    // === ПОДТВЕРЖДЕНИЕ КОДА ДЛЯ AMNYAM ===
+    codeConfirmBtn.addEventListener('click', function() {
+        const code = amnyamCode.value.trim();
+
+        if (!code || code !== AMNYAM_CODE) {
+            statusIcon.textContent = '❌';
+            statusText.textContent = 'Неверный код доступа Амням-Алега номер 9921. Доступ запрещён.';
+            statusText.style.color = '#ff6666';
+            return;
+        }
+
+        if (pendingAuthData) {
+            const username = pendingAuthData.username || 'Am_Yuma';
+            completeAuth(pendingAuthData, username);
+            codeRequired.classList.remove('visible');
+            amnyamCode.value = '';
+            pendingAuthData = null;
+        }
+    });
+
+    // === ЗАВЕРШЕНИЕ АВТОРИЗАЦИИ ===
+    function completeAuth(data, username) {
+        const isAdminUser = ADMIN_USERS.includes(username);
+
+        statusIcon.textContent = '✅';
+        statusText.textContent = `Авторизация успешна! Добро пожаловать, @${username}`;
+        statusText.style.color = '#88dd88';
+
+        updateUI(username, isAdminUser);
+
+        console.log(`✅ ФКН ПАСПОРТА: ${username} авторизован через OAuth. Админ: ${isAdminUser}`);
+        if (username === 'Am_Yuma') {
+            console.log('🍬 Амням-Алег номер 9921 (позывной "ам-ном") прошёл верификацию.');
+        }
+    }
+
+    // === ОБНОВЛЕНИЕ UI ===
+    function updateUI(user, admin) {
+        currentUser = user;
+        isAdmin = admin;
+
+        passportPreview.classList.add('visible');
+        const passNum = generatePassportNumber();
+        passportNumber.textContent = passNum;
+        passportOwner.textContent = '@' + user;
+
+        if (user === 'Am_Yuma') {
+            callsignContainer.style.display = 'block';
+            document.getElementById('callsignText').textContent = 'ам-ном';
+        } else {
+            callsignContainer.style.display = 'none';
+        }
+
+        if (user === 'Am_Yuma') {
+            betaFooter.classList.add('visible');
+        } else {
+            betaFooter.classList.remove('visible');
+        }
+
+        if (admin) {
+            passportStatus.textContent = 'АДМИНИСТРАТОР ФКН';
+            passportStatus.style.color = '#ffdd44';
+            adminBadgeContainer.style.display = 'block';
+            adminPanel.classList.add('visible');
+        } else {
+            passportStatus.textContent = 'ВЕРИФИЦИРОВАН';
+            passportStatus.style.color = '#ff7777';
+            adminBadgeContainer.style.display = 'none';
+            adminPanel.classList.remove('visible');
+        }
+
+        document.getElementById('loginSection').style.display = 'none';
+    }
+
+    // === ГЕНЕРАЦИЯ ПАСПОРТА ===
+    function generatePassportNumber() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < 8; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    // === ОБРАБОТКА ENTER В ПОЛЕ КОДА ===
+    amnyamCode.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            codeConfirmBtn.click();
+        }
+    });
+
+    console.log('%cФКН ПАСПОРТА · Бета-версия', 'color: #ff4444; font-size: 16px; font-weight: bold;');
+    console.log('%cАдминистраторы ФКН:', 'color: #ffaa66;');
+    ADMIN_USERS.forEach(u => console.log(`  👑 @${u}`));
+    console.log('%c🍬 @Am_Yuma (Амням-Алег №9921) позывной "ам-ном"', 'color: #88ff88;');
+    console.log('%c🔑 Код доступа: 6614398asnud!199', 'color: #ffaa44;');
+    console.log('%c🧪 бета-тест благодаря ДД-дэвэлопер-сапорт', 'color: #66cc66;');
+    console.log('%c🤖 Бот: @FersKOMnaszor_bot', 'color: #66aaff;');
+</script>
+</body>
+</html>
