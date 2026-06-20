@@ -77,6 +77,39 @@
             border: 1px solid #c44;
         }
 
+        .vpn-warning {
+            background: #1a0000;
+            border: 2px solid #ff2222;
+            border-radius: 60px;
+            padding: 10px 28px;
+            margin-top: 12px;
+            display: inline-block;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ff4444;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: vpnBlink 1.5s infinite;
+            box-shadow: 0 0 20px #ff000044;
+        }
+
+        @keyframes vpnBlink {
+            0% { border-color: #ff2222; box-shadow: 0 0 15px #ff000044; }
+            50% { border-color: #ff0000; box-shadow: 0 0 40px #ff000088; background: #2a0000; }
+            100% { border-color: #ff2222; box-shadow: 0 0 15px #ff000044; }
+        }
+
+        .vpn-warning .vpn-icon {
+            display: inline-block;
+            animation: shieldPulse 1.5s infinite;
+        }
+
+        @keyframes shieldPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
         .login-section {
             background: #0d0000;
             border: 2px solid #a33;
@@ -203,30 +236,6 @@
             transform: none;
         }
 
-        .status-box {
-            background: #1a0101;
-            border: 1px solid #a33;
-            border-radius: 20px;
-            padding: 1rem;
-            margin-top: 1.5rem;
-            text-align: center;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        .status-box .status-icon {
-            font-size: 2rem;
-        }
-
-        .status-box .status-text {
-            font-size: 0.9rem;
-            color: #ddbbbb;
-            margin-top: 4px;
-        }
-
         .passport-preview {
             background: #1a0101;
             border: 2px solid #a33;
@@ -272,6 +281,20 @@
             border-radius: 40px;
             display: inline-block;
             border: 1px dashed #886644;
+        }
+
+        .passport-preview .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #ff4444;
+            margin: 10px auto;
+            display: none;
+            object-fit: cover;
+        }
+
+        .passport-preview .avatar.visible {
+            display: block;
         }
 
         .admin-only {
@@ -331,7 +354,7 @@
             font-size: 0.65rem;
             border-top: 1px solid #a33;
             padding-top: 1rem;
-            color: #b77;
+            color: #887777;
         }
 
         a {
@@ -343,6 +366,7 @@
             .container { padding: 1rem; }
             h1 { font-size: 2rem; }
             .login-section { padding: 1.2rem; }
+            .vpn-warning { font-size: 0.8rem; padding: 8px 16px; }
         }
     </style>
 </head>
@@ -356,6 +380,9 @@
             <span class="cyber-emblem">⚡🔒📡</span>
         </div>
         <div class="sub">Федеральная служба ФерсКомНадзора · Цифровая идентификация ФЧ</div>
+        <div class="vpn-warning">
+            <span class="vpn-icon">🛡️</span> ВХОД ТОЛЬКО С ВПН ДЛЯ БЕЗОПАСНОСТИ <span class="vpn-icon">🛡️</span>
+        </div>
         <div style="font-size: 0.65rem; margin-top: 8px; color: #996666;">
             Бета-версия · Вход через Telegram
         </div>
@@ -369,7 +396,7 @@
         </div>
 
         <div class="tg-auth-wrapper">
-            <button class="tg-auth-button" data-style="outlined">🔵 Войти через Telegram</button>
+            <button class="tg-auth-button" data-style="outlined" id="tgLoginBtn">🔵 Войти через Telegram</button>
         </div>
 
         <div class="code-required" id="codeRequired">
@@ -382,15 +409,11 @@
             </div>
             <button class="btn-primary" id="codeConfirmBtn">✅ ПОДТВЕРДИТЬ КОД</button>
         </div>
-
-        <div class="status-box" id="statusBox">
-            <span class="status-icon">⏳</span>
-            <span class="status-text">Ожидание авторизации...</span>
-        </div>
     </div>
 
     <div class="passport-preview" id="passportPreview">
         <div style="font-size: 1.2rem; color: #ffaaaa;">🆔 ФКН-ПАСПОРТ</div>
+        <img id="userAvatar" class="avatar" src="" alt="Аватар">
         <div style="display: flex; justify-content: center; gap: 1.5rem; margin: 0.8rem 0; flex-wrap: wrap;">
             <span>ФЧ-2026-<span id="passportNumber">XXXX</span></span>
             <span>Статус: <span id="passportStatus" style="color:#ff7777;">ВЕРИФИЦИРОВАН</span></span>
@@ -430,13 +453,9 @@
     </div>
 
     <footer>
-        © ФКН ПАСПОРТА — Бета-версия. Вход через Telegram.<br>
-        Фиксай, Фиксая, Фиксаю, Фиксаем, о Фиксае — все паспорта действительны.
+        © ФКН ПАСПОРТА — Бета-версия. Вход только с ВПН.
     </footer>
 </div>
-
-<!-- Telegram OAuth скрипт -->
-<script async src="https://oauth.telegram.org/js/telegram-login.js?5" data-client-id="@FersKOMnaszor_bot" data-onauth="handleTelegramAuth(data)" data-request-access="write phone"></script>
 
 <script>
     // === СПИСОК АДМИНОВ ===
@@ -446,9 +465,6 @@
     const AMNYAM_CODE = '6614398asnud!199';
 
     // === ЭЛЕМЕНТЫ ===
-    const statusBox = document.getElementById('statusBox');
-    const statusIcon = statusBox.querySelector('.status-icon');
-    const statusText = statusBox.querySelector('.status-text');
     const passportPreview = document.getElementById('passportPreview');
     const passportNumber = document.getElementById('passportNumber');
     const passportStatus = document.getElementById('passportStatus');
@@ -460,40 +476,32 @@
     const codeRequired = document.getElementById('codeRequired');
     const amnyamCode = document.getElementById('amnyamCode');
     const codeConfirmBtn = document.getElementById('codeConfirmBtn');
+    const tgLoginBtn = document.getElementById('tgLoginBtn');
+    const userAvatar = document.getElementById('userAvatar');
 
     let pendingAuthData = null;
-    let isLoggedIn = false;
-    let currentUser = '';
-    let isAdmin = false;
 
-    // === ОБРАБОТЧИК TELEGRAM OAUTH ===
-    window.handleTelegramAuth = function(data) {
+    // === ФУНКЦИЯ ОБРАБОТКИ АВТОРИЗАЦИИ ===
+    function handleTelegramAuth(data) {
         console.log('Telegram OAuth data:', data);
 
         const username = data.username || data.first_name || 'unknown';
 
-        // Если это Am_Yuma, запрашиваем код
         if (username === 'Am_Yuma') {
             pendingAuthData = data;
             codeRequired.classList.add('visible');
-            statusIcon.textContent = '🔐';
-            statusText.textContent = 'Для @Am_Yuma требуется специальный код доступа';
-            statusText.style.color = '#ffaa44';
             return;
         }
 
-        // Для остальных пользователей — сразу пропускаем
         completeAuth(data, username);
-    };
+    }
 
     // === ПОДТВЕРЖДЕНИЕ КОДА ДЛЯ AMNYAM ===
     codeConfirmBtn.addEventListener('click', function() {
         const code = amnyamCode.value.trim();
 
         if (!code || code !== AMNYAM_CODE) {
-            statusIcon.textContent = '❌';
-            statusText.textContent = 'Неверный код доступа Амням-Алега номер 9921. Доступ запрещён.';
-            statusText.style.color = '#ff6666';
+            alert('Неверный код доступа Амням-Алега номер 9921. Доступ запрещён.');
             return;
         }
 
@@ -509,12 +517,7 @@
     // === ЗАВЕРШЕНИЕ АВТОРИЗАЦИИ ===
     function completeAuth(data, username) {
         const isAdminUser = ADMIN_USERS.includes(username);
-
-        statusIcon.textContent = '✅';
-        statusText.textContent = `Авторизация успешна! Добро пожаловать, @${username}`;
-        statusText.style.color = '#88dd88';
-
-        updateUI(username, isAdminUser);
+        updateUI(data, username, isAdminUser);
 
         console.log(`✅ ФКН ПАСПОРТА: ${username} авторизован через OAuth. Админ: ${isAdminUser}`);
         if (username === 'Am_Yuma') {
@@ -523,14 +526,18 @@
     }
 
     // === ОБНОВЛЕНИЕ UI ===
-    function updateUI(user, admin) {
-        currentUser = user;
-        isAdmin = admin;
-
+    function updateUI(data, user, admin) {
         passportPreview.classList.add('visible');
         const passNum = generatePassportNumber();
         passportNumber.textContent = passNum;
         passportOwner.textContent = '@' + user;
+
+        if (user === 'Am_Yuma' && data.photo_url) {
+            userAvatar.src = data.photo_url;
+            userAvatar.classList.add('visible');
+        } else {
+            userAvatar.classList.remove('visible');
+        }
 
         if (user === 'Am_Yuma') {
             callsignContainer.style.display = 'block';
@@ -577,7 +584,32 @@
         }
     });
 
+    // === КНОПКА ВХОДА ===
+    tgLoginBtn.addEventListener('click', function() {
+        const clientId = '@FersKOMnaszor_bot';
+        const authUrl = `https://oauth.telegram.org/auth?bot_id=${clientId.replace('@', '')}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write`;
+        
+        const width = 600;
+        const height = 600;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+        
+        const popup = window.open(
+            authUrl,
+            'TelegramAuth',
+            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+        );
+        
+        if (!popup) {
+            alert('Пожалуйста, разрешите всплывающие окна для этого сайта');
+        }
+    });
+
+    // === ГЛОБАЛЬНАЯ ФУНКЦИЯ ДЛЯ TELEGRAM WIDGET ===
+    window.handleTelegramAuth = handleTelegramAuth;
+
     console.log('%cФКН ПАСПОРТА · Бета-версия', 'color: #ff4444; font-size: 16px; font-weight: bold;');
+    console.log('%c🛡️ ВХОД ТОЛЬКО С ВПН ДЛЯ БЕЗОПАСНОСТИ', 'color: #ff4444; font-size: 14px; font-weight: bold;');
     console.log('%cАдминистраторы ФКН:', 'color: #ffaa66;');
     ADMIN_USERS.forEach(u => console.log(`  👑 @${u}`));
     console.log('%c🍬 @Am_Yuma (Амням-Алег №9921) позывной "ам-ном"', 'color: #88ff88;');
